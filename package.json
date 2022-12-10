@@ -23,13 +23,18 @@
     "@mantine/prism": "^5.1.5",
     "dayjs": "^1.11.5",
     "dotenv": "^16.0.1",
+    "framer-motion": "^7.6.19",
     "lodash": "^4.17.21",
     "next": "12.2.5",
     "next-translate": "^1.5.0",
     "nextjs-progressbar": "^0.0.14",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "stylis-plugin-rtl": "^2.1.1"
+    "react-hot-toast": "^2.4.0",
+    "react-spinners": "^0.13.7",
+    "recoil": "^0.7.6",
+    "stylis-plugin-rtl": "^2.1.1",
+    "tabler-icons-react": "^1.56.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.185",
