@@ -1,0 +1,42 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Project "Bankify" {
+  database_type: 'PostgreSQL'
+  Note: 'Bankify'
+}
+
+Table Customer {
+  id String [pk]
+  email String
+  name String
+  username String [unique, not null]
+  password String [not null]
+  balance Float [not null, default: 0]
+  accountNumber String [unique, not null]
+  sentTransfers Transfer [not null]
+  receivedTransfers Transfer [not null]
+  role Role [not null, default: 'USER']
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Transfer {
+  id String [pk]
+  amount Float [not null]
+  transferNumber String [unique, not null]
+  from Customer [not null]
+  fromId String [not null]
+  to Customer [not null]
+  toId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Enum Role {
+  USER
+  ADMIN
+}
+
+Ref: Transfer.fromId > Customer.id
+
+Ref: Transfer.toId > Customer.id

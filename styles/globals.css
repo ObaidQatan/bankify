@@ -12,6 +12,11 @@
   src: url('../src/assets/fonts/Cairo/Cairo.ttf');
 }
 
+@font-face {
+  font-family: Monteserrat;
+  src: url('../src/assets/fonts/Monteserrat/Monteserrat.ttf');
+}
+
 html,
 body {
   padding: 0;

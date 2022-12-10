@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider            = "prisma-dbml-generator"
+  output              = "../dbml"
+  projectName         = "Bankify"
+  projectDatabaseType = "PostgreSQL"
+  outputName          = "er.diagram.dbml"
+  projectNote         = "Bankify"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id                String     @id @default(uuid())
+  email             String?
+  name              String?
+  username          String     @unique
+  password          String
+  balance           Float      @default(0)
+  accountNumber     String     @unique
+  sentTransfers     Transfer[] @relation("from")
+  receivedTransfers Transfer[] @relation("to")
+  role              Role       @default(USER)
+
+  createdAt DateTime @default(now())
+}
+
+model Transfer {
+  id             String   @id @default(uuid())
+  amount         Float
+  transferNumber String   @unique
+  from           Customer @relation(fields: [fromId], references: [id], name: "from")
+  fromId         String
+  to             Customer @relation(fields: [toId], references: [id], name: "to")
+  toId           String
+  createdAt      DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}

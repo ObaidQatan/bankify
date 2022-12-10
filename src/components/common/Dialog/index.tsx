@@ -29,7 +29,7 @@ const Dialog = ({
             className={`hover:bg-[#ffffff20]`}
             size={15}
             color="gray"
-            onClick={() => closer(false)}
+            onClick={() => closer()}
           />
         </div>
 

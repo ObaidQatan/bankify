@@ -13,28 +13,16 @@ import NextNProgress from "nextjs-progressbar";
 import { useColorScheme, useLocalStorage } from "@mantine/hooks";
 import { ModalsProvider } from "@mantine/modals";
 import { NotificationsProvider } from "@mantine/notifications";
+import { RecoilRoot } from "recoil";
+import { Toaster } from "react-hot-toast";
+import Loading from "../src/components/common/Loading";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { lang, t } = useTranslation();
-  const isAR = lang === "ar";
-
-  const currentColorScheme = useColorScheme();
-  const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
-    key: "mantine-colorScheme",
-    getInitialValueInEffect: true,
-    defaultValue: currentColorScheme,
-  });
-
-  const toggleColorScheme = (cs?: ColorScheme) => {
-    if (cs) {
-      setColorScheme(cs);
-    } else {
-      setColorScheme(currentColorScheme === "light" ? "dark" : "light");
-    }
-  };
+  console.log({ lang });
 
   return (
-    <div dir={isAR ? "rtl" : "ltr"}>
+    <div dir={lang === "ar" ? "rtl" : "ltr"}>
       <NextNProgress />
       <Head>
         <title>{t("common:appName")}</title>
@@ -46,28 +34,55 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
       </Head>
 
-      <ColorSchemeProvider
-        colorScheme={colorScheme}
-        toggleColorScheme={toggleColorScheme}
-      >
+      <ColorSchemeProvider colorScheme={"dark"} toggleColorScheme={() => {}}>
         <MantineProvider
           withGlobalStyles
           withNormalizeCSS
           emotionCache={rtlCache}
           theme={{
-            dir: isAR ? "rtl" : "ltr",
-            colorScheme,
+            dir: lang === "ar" ? "rtl" : "ltr",
             defaultRadius: 5,
-            fontFamily: isAR ? "Cairo" : "Nunito",
-            primaryColor: "cyan",
+            colorScheme: "dark",
+            fontFamily: lang === "ar" ? "Cairo" : "Nunito",
+            colors: {
+              "primary-start": [
+                "#8E54E9",
+                "#8E54E9",
+                "#8E54E9",
+                "#8E54E9",
+                "#8E54E9",
+                "#8E54E9",
+                "#8E54E9",
+                "#7947c7",
+                "#7947c7",
+                "#8E54E9",
+              ],
+              dark: [
+                "#aaa",
+                "#aaa",
+                "#aaa",
+                "#aaa",
+                "#aaa",
+                "#403e5d",
+                "#403e5d",
+                "#403e5d",
+                "#403e5d",
+                "#403e5d",
+              ],
+            },
+            primaryColor: "primary-start",
           }}
         >
           <ModalsProvider>
             <NotificationsProvider
-              position={isAR ? "bottom-left" : "bottom-right"}
+              position={lang === "ar" ? "bottom-left" : "bottom-right"}
               zIndex={2077}
             >
-              <Component {...pageProps} />
+              <RecoilRoot>
+                <Toaster />
+                <Loading />
+                <Component {...pageProps} />
+              </RecoilRoot>
             </NotificationsProvider>
           </ModalsProvider>
         </MantineProvider>

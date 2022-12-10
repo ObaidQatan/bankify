@@ -1,47 +1,34 @@
-import { Button } from "@mantine/core";
-import { camelCase } from "lodash";
 import useTranslation from "next-translate/useTranslation";
-import Link from "next/link";
-import LogoIcon from "../Logo/LogoIcon";
-import LogoText from "../Logo/LogoText";
+import { useRouter } from "next/router";
+import Logo from "../Logo";
 
 const Header = () => {
-  const { t } = useTranslation("common");
-  const isDark = false;
+  const router = useRouter();
 
   return (
-    <header className="absolute flex justify-between px-3 py-8 w-full top-0 z-[100] bg-transparent text-white">
-      <Link href="/">
-        <a className="flex justify-start items-center">
-          <LogoIcon className="w-9 h-9 mx-2" />
-          <LogoText className="w-[200px]" />
-        </a>
-      </Link>
-
-      <div className="links flex justify-between items-center flex-[0.7]">
-        <div className="pages flex flex-1 justify-end items-center">
-          {["Home", "About", "Pricing"].map((link) => (
-            <Link href={`/${camelCase(link)}`} key={link}>
-              <a className="hover:bg-white hover:bg-opacity-10 mx-2 px-3 py-1 rounded-md">
-                {t(camelCase(link))}
-              </a>
-            </Link>
-          ))}
-        </div>
-        <div className="external-links flex flex-1 justify-center items-center">
-          <Link href="/signin">
-            <a className="hover:underline mx-2">{t("signin")}</a>
-          </Link>
-          <Link href="/freetrial">
-            <a className="mx-2">
-              <Button color="white" variant="light">
-                {t(camelCase("Start Free Trial"))}
-              </Button>
-            </a>
-          </Link>
-        </div>
+    <div className="header flex flex-row w-full h-16 bg-[#403e5d] border-b border-[#00000050] overflow-hidden">
+      <div className="back-btn flex flex-row items-center justify-center w-16 h-full">
+        <button
+          className="flex items-center justify-center w-8 h-8 text-gray-300 rounded-full hover:bg-[#ffffff30] focus:outline-none focus:ring focus:ring-gray-200"
+          onClick={() => router.back()}
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </button>
       </div>
-    </header>
+      <div className="flex-1 flex justify-end items-center translate-y-2 translate-x-5">
+        <Logo size={120} />
+      </div>
+    </div>
   );
 };
 

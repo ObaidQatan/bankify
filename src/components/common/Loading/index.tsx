@@ -27,7 +27,7 @@ const Loading = ({
         {...props}
       >
         <div className="wrapper bg-[#7367f0] py-5 px-8 rounded-md">
-          <ScaleLoader loading={true} />
+          <ScaleLoader loading={true} color="#fff" />
         </div>
       </div>
     );
