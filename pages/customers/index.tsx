@@ -55,7 +55,10 @@ const Home: NextPage = () => {
 
             return showNotification({
               title: "Error",
-              message: data.error,
+              message:
+                typeof data.error === "string"
+                  ? data.error
+                  : data.error.message,
               color: "red",
             });
           } else {
@@ -76,7 +79,7 @@ const Home: NextPage = () => {
         setLoading(false);
         return showNotification({
           title: "Error",
-          message: e,
+          message: typeof e === "string" ? e : e.message,
           color: "red",
         });
       });
@@ -92,6 +95,72 @@ const Home: NextPage = () => {
       receiverId,
       amount,
     });
+
+    setLoading(true);
+
+    fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL as string}/api/transfer/create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          senderId,
+          receiverId,
+          amount,
+        }),
+      }
+    )
+      .then((res) => {
+        if (!res.ok) {
+          setLoading(false);
+
+          return showNotification({
+            title: "Error",
+            message: "Error making the transfer",
+            color: "red",
+          });
+        }
+
+        res.json().then((data) => {
+          if (data.error) {
+            console.log(data.error);
+            setLoading(false);
+
+            return showNotification({
+              title: "Error",
+              message:
+                typeof data.error === "string"
+                  ? data.error
+                  : data.error.message,
+              color: "red",
+            });
+          } else {
+            showNotification({
+              title: "Success",
+              message: "Transfer done successfully",
+              color: "green",
+            });
+
+            setLoading(false);
+            setTransferDialog(false);
+            setSelectedCustomer(undefined);
+            fetchCustomers();
+            console.log({ transfer: data.transfer });
+            return;
+          }
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        setLoading(false);
+        return showNotification({
+          title: "Error",
+          message: typeof e === "string" ? e : e.messagee,
+          color: "red",
+        });
+      });
   };
 
   return (
@@ -112,7 +181,11 @@ const Home: NextPage = () => {
         emit={(ob: { sender: Customer; amount: number } | undefined) => {
           ob && transferMoney(ob.sender.id, selectedCustomer?.id!, ob.amount);
         }}
-        customers={customers.filter((c) => c.id !== selectedCustomer?.id)}
+        customers={
+          customers
+            ? customers?.filter((c) => c.id !== selectedCustomer?.id)
+            : []
+        }
         open={transferDialog}
         closer={() => {
           setTransferDialog(false);

@@ -37,3 +37,6 @@ export const CUSTOMER_IS_REQUIRED = "Customer is required";
 export const CUSTOMER_NOT_FOUND = "Customer not found";
 export const CUSTOMERS_NOT_FOUND = "Customers not found";
 export const CUSTOMER_ALREADY_EXIST = "Customer already exist";
+export const UNSUFFECIENT_BALANCE = "Unsuffecient balance";
+export const SENDER_NOT_FOUND = "Sender not found";
+export const RECEIVER_NOT_FOUND = "Receiver not found";
