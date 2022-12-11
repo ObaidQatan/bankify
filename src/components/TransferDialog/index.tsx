@@ -2,7 +2,7 @@ import { Select, Input } from "@mantine/core";
 import { Customer } from "@prisma/client";
 import { camelCase, startCase } from "lodash";
 import useTranslation from "next-translate/useTranslation";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import RegularButton from "../common/Buttons/Regular";
 import Dialog from "../common/Dialog";
 
@@ -47,7 +47,7 @@ const TransferDialog = ({
             className="border-t border-[#00000020] w-full mt-5"
             type={"number"}
             placeholder={startCase(tCommon(camelCase("amount to send")))}
-            onChange={(v) =>
+            onChange={(v: ChangeEvent<HTMLInputElement>) =>
               setAmount(parseFloat(v.currentTarget.value || "0"))
             }
           />
