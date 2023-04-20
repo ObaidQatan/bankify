@@ -1,0 +1,346 @@
+p1 i:
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdio.h>
+int main(int argc,char* argv[])
+{
+    char size[10];
+    int k;
+    int fd = open(argv[1], O_RDONLY);
+    char buffer[20];
+    write(1,"Read first 20 bytes\n",20);
+    read(fd,buffer,20);
+    write(1,buffer,20);
+    write(1,"Seek to 10th byte from beginning and read 20 bytes\n",51);
+    lseek(fd,10,SEEK_SET);
+    read(fd,buffer,20);
+    write(1,buffer,20);
+    write(1, "Seek to 10th byte from current offset and read 20 bytes\n", 56);
+    lseek(fd,10,SEEK_CUR);
+    read(fd, buffer, 20);
+    write(1, buffer, 20);
+    write(1, "Size of the file\n", 17);
+    k = lseek(fd,0,SEEK_END);
+    sprintf(size,"%d",k);
+    write(1,size,strlen(size));
+}
+
+//=====================================================
+
+p1 ii:
+
+#include <setjmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+static void f1(int, int, int, int);
+static void f2(void);
+static jmp_buf jmpbuffer;
+static int globval;
+int main(void)
+{
+  int autoval;
+  register int regival;
+  volatile int volaval;
+  static int statval;
+
+  globval = 1;
+  autoval = 2;
+  regival = 3;
+  volaval = 4;
+  statval = 5;
+  if (setjmp(jmpbuffer) != 0)
+  {
+    printf("after longjmp:\n");
+    printf("globval = %d, autoval = %d, regival = %d, volaval = %d, statval = %d\n", globval, autoval, regival, volaval, statval);
+    exit(0);
+  }
+  /*
+    Change variables after setjmp, but before longjmp.
+  */
+  globval = 95;
+  autoval = 96;
+  regival = 97;
+  volaval = 98;
+  statval = 99;
+  f1(autoval, regival, volaval, statval); /* never returns */
+  exit(0);
+}
+static void f1(int i, int j, int k, int l)
+{
+  printf("in f1():\n");
+  printf("globval = %d, autoval = %d, regival = %d, volaval = %d, statval = %d\n", globval, i, j, k, l);
+  globval = 10000;
+  j = 10000;
+  f2();
+}
+static void f2(void)
+{
+  longjmp(jmpbuffer, 1);
+}
+
+// ===========================
+
+p2:
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+void print_file_flags(int fd) {
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+        perror("fcntl");
+        return;
+    }
+    printf("File flags for descriptor %d:\n", fd);
+    if (flags & O_APPEND) {
+        printf("\tO_APPEND\n");
+    }
+    if (flags & O_ASYNC) {
+        printf("\tO_ASYNC\n");
+    }
+    if (flags & O_DIRECT) {
+        printf("\tO_DIRECT\n");
+    }
+    if (flags & O_NOATIME) {
+        printf("\tO_NOATIME\n");
+    }
+    if (flags & O_NONBLOCK) {
+        printf("\tO_NONBLOCK\n");
+    }
+    if (flags & O_SYNC) {
+        printf("\tO_SYNC\n");
+    }
+    if (flags & O_TRUNC) {
+        printf("\tO_TRUNC\n");
+    }
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <file descriptor>\n", argv[0]);
+        return 1;
+    }
+    int fd = atoi(argv[1]);
+    print_file_flags(fd);
+    return 0;
+}
+
+// ===================================
+
+p3:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int my_system(const char *command) {
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        return -1;
+    } else if (pid == 0) {
+        // Child process
+        execl("/bin/sh", "sh", "-c", command, (char *) NULL);
+        perror("execl");
+        _exit(127);
+    } else {
+        // Parent process
+        int status;
+        if (waitpid(pid, &status, 0) == -1) {
+            perror("waitpid");
+            return -1;
+        } else {
+            if (WIFEXITED(status)) {
+                return WEXITSTATUS(status);
+            } else {
+                fprintf(stderr, "Child process terminated abnormally\n");
+                return -1;
+            }
+        }
+    }
+}
+
+int main() {
+    int status = my_system("ls -l");
+    printf("my_system returned %d\n", status);
+    return 0;
+}
+
+//=======================================
+
+p4:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int main() {
+    int fd = open("test.txt", O_RDWR | O_CREAT, 0644);
+    if (fd == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        // Child process
+        char buffer[256];
+        ssize_t num_read = read(fd, buffer, 256);
+        if (num_read == -1) {
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+        printf("Child process read %zd bytes from file at offset %lld\n", num_read, (long long) lseek(fd, 0, SEEK_CUR));
+        exit(EXIT_SUCCESS);
+    } else {
+        // Parent process
+        if (lseek(fd, 100, SEEK_SET) == -1) {
+            perror("lseek");
+            exit(EXIT_FAILURE);
+        }
+        printf("Parent process set file offset to %lld\n", (long long) lseek(fd, 0, SEEK_CUR));
+        exit(EXIT_SUCCESS);
+    }
+}
+
+//======================================
+
+p5:
+
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <utime.h>
+#include <time.h>
+#include <fcntl.h>
+
+int main(int argc, char *argv[]) //copying ctime and mtime of argv[2] to argv[1]
+{
+  int fd;
+  struct stat statbuf_1;
+  struct stat statbuf_2;
+  struct utimbuf times;
+
+  if (stat(argv[1], &statbuf_1) < 0)
+    printf("Error!\n");
+  if (stat(argv[2], &statbuf_2) < 0)
+    printf("Error!\n");
+  printf("Before Copying ...\n");
+  printf("Access Time %s\nModification Time%s\n", ctime(&statbuf_1.st_atime),
+  ctime(&statbuf_1.st_mtime));
+
+  times.modtime = statbuf_2.st_mtime;
+  times.actime = statbuf_2.st_mtime;
+
+  if (utime(argv[1], &times) < 0)
+    printf("Error copying time \n");
+
+  if (stat(argv[1], &statbuf_1) < 0)
+    printf("Error!\n");
+
+  printf("After Copying ...\n");
+
+  printf("Access Time %s\nModification Time%s\n", ctime(&statbuf_1.st_atime), ctime(&statbuf_1.st_mtime));
+}
+
+// ========================================
+
+p6:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main() {
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        // Child process
+        char *args[] = {"./access_demo", NULL};
+        execvp(args[0], args);
+        perror("execvp");
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        int status;
+        printf("Parent process (PID=%d) waiting for child process (PID=%d) to exit...\n", getpid(), pid);
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+            printf("Child process (PID=%d) exited with status %d\n", pid, WEXITSTATUS(status));
+        } else if (WIFSIGNALED(status)) {
+            printf("Child process (PID=%d) terminated by signal %d\n", pid, WTERMSIG(status));
+        }
+        exit(EXIT_SUCCESS);
+    }
+}
+
+// ============================
+
+p7:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    int shared_variable = 0;
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        // Child process
+        printf("Child process: shared_variable = %d\n", shared_variable);
+        shared_variable++;
+        printf("Child process: shared_variable = %d\n", shared_variable);
+    } else {
+        // Parent process
+        printf("Parent process: shared_variable = %d\n", shared_variable);
+        shared_variable++;
+        printf("Parent process: shared_variable = %d\n", shared_variable);
+    }
+    exit(EXIT_SUCCESS);
+}
+
+// =============================
+
+p8:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int main() {
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        // Child process
+        printf("Child process executing\n");
+        sleep(5);
+        printf("Child process exiting\n");
+        exit(EXIT_SUCCESS);
+    } else {
+        // Parent process
+        printf("Parent process waiting for child\n");
+        wait(NULL);
+        printf("Parent process exiting\n");
+        exit(EXIT_SUCCESS);
+    }
+}
+
